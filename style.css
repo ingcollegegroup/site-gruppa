@@ -353,4 +353,92 @@ p {
         width: 90%;
         text-align: center;
     }
+}/* =========================
+   РАСПИСАНИЕ НА СЕГОДНЯ
+========================= */
+
+.today-card {
+    width: 90%;
+    max-width: 850px;
+    margin: 25px auto 35px;
+
+    background: #123524;
+    border: 1px solid #2f7d57;
+    border-radius: 16px;
+
+    padding: 22px;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.today-card h3 {
+    text-align: center;
+    margin: 0 0 18px;
+
+    font-size: 25px;
+    color: white;
+}
+
+.today-date {
+    text-align: center;
+    color: #9fd0b5;
+    margin-bottom: 20px;
+}
+
+.today-lesson {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 14px 16px;
+    margin: 8px 0;
+
+    background: #163126;
+
+    border-radius: 10px;
+    border: 1px solid #2c4a3d;
+}
+
+.today-lesson.current {
+    border: 2px solid #7dd3a7;
+    background: #214a37;
+}
+
+.today-lesson.next {
+    border: 1px solid #4fa879;
+}
+
+.today-lesson-name {
+    font-weight: bold;
+}
+
+.today-lesson-time {
+    color: #9fd0b5;
+    white-space: nowrap;
+}
+
+.today-message {
+    text-align: center;
+    margin-top: 18px;
+
+    font-size: 17px;
+    color: #cfe7db;
+}
+
+.today-message strong {
+    color: white;
+}
+
+@media (max-width: 600px) {
+
+    .today-card {
+        width: 100%;
+    }
+
+    .today-lesson {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
