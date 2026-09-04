@@ -1,6 +1,26 @@
-// ==============================
-// ПРЕДМЕТЫ ПО ДНЯМ
-// ==============================
+// ==========================================
+// ПРЕПОДАВАТЕЛИ
+// ==========================================
+
+const teachers = {
+    "Литература": "Матиева Ф.Р.",
+    "Родная литература": "Льянова М.В.",
+    "Математика": "Вакансия матем.",
+    "Основы проектной деятельности": "Льянова Л.М.",
+    "Русский язык": "Матиева Ф.Р.",
+    "Физика": "Саутиева А.М.",
+    "Информатика": "Костоева М.Т.",
+    "Биология": "Куртоева М.К.",
+    "Физическая культура": "Алероева С.С.",
+    "Иностранный язык": "Газикова Л.М.",
+    "Обществознание": "Вакансия общ.",
+    "Химия": "Льянова Х.Б."
+};
+
+
+// ==========================================
+// РАСПИСАНИЕ ПО ДНЯМ
+// ==========================================
 
 const monday = [
     "Литература",
@@ -30,23 +50,23 @@ const wednesday = [
     "Информатика"
 ];
 
-// В ЧЕТВЕРГ ТОЛЬКО 3 ПАРЫ
+// Четверг — 3 пары
 const thursday = [
     "Физическая культура",
     "Иностранный язык",
     "Обществознание"
 ];
 
-// В ПЯТНИЦУ ТОЛЬКО 2 ПАРЫ
+// Пятница — 2 пары
 const friday = [
     "Химия",
     "Математика"
 ];
 
 
-// ==============================
+// ==========================================
 // ВРЕМЯ ПАР
-// ==============================
+// ==========================================
 
 const pairTimes = [
     "09:00–10:20",
@@ -56,9 +76,9 @@ const pairTimes = [
 ];
 
 
-// ==============================
+// ==========================================
 // ВСЕ НЕДЕЛИ
-// ==============================
+// ==========================================
 
 const weeks = [
 
@@ -317,9 +337,9 @@ const weeks = [
 ];
 
 
-// ==============================
+// ==========================================
 // НАЗВАНИЯ ДНЕЙ
-// ==============================
+// ==========================================
 
 const dayNames = [
     "Понедельник",
@@ -330,182 +350,255 @@ const dayNames = [
 ];
 
 
-// ==============================
-// ЭЛЕМЕНТЫ HTML
-// ==============================
+// ==========================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ==========================================
 
-const weekSelect = document.getElementById("weekSelect");
-const scheduleHead = document.getElementById("scheduleHead");
-const scheduleBody = document.getElementById("scheduleBody");
-
-
-// ==============================
-// ДОБАВЛЯЕМ НЕДЕЛИ В СПИСОК
-// ==============================
-
-weeks.forEach((week, index) => {
-
-    const option = document.createElement("option");
-
-    option.value = index;
-    option.textContent = week.label;
-
-    weekSelect.appendChild(option);
-
-});
+function getTeacher(subject) {
+    return teachers[subject] || "";
+}
 
 
-// ==============================
-// ПОКАЗ РАСПИСАНИЯ
-// ==============================
+function getLessonHTML(subject) {
 
-function renderSchedule(index) {
+    const teacher = getTeacher(subject);
 
-    const week = weeks[index];
+    return `
+        <div class="subject-name">
+            ${subject}
+        </div>
 
-
-    // Шапка таблицы
-
-    scheduleHead.innerHTML = `
-        <tr>
-            <th>Пара / время</th>
-
-            ${dayNames.map((day, i) => `
-                <th>
-                    ${day}
-                    <small>${week.dates[i]}</small>
-                </th>
-            `).join("")}
-        </tr>
+        ${
+            teacher
+                ? `<div class="teacher-name">${teacher}</div>`
+                : ""
+        }
     `;
-
-
-    scheduleBody.innerHTML = "";
-
-
-    // Всего максимум 4 пары
-
-    for (let pair = 0; pair < 4; pair++) {
-
-        const row = document.createElement("tr");
-
-
-        // Номер пары + время
-
-        const pairCell = document.createElement("td");
-
-        pairCell.innerHTML = `
-            <strong>${pair + 1} пара</strong>
-            <span class="pair-time">${pairTimes[pair]}</span>
-        `;
-
-        row.appendChild(pairCell);
-
-
-        // Предметы по дням
-
-        week.days.forEach(day => {
-
-            // Если весь день занятий нет
-
-            if (day.length === 0) {
-
-                if (pair === 0) {
-
-                    const cell = document.createElement("td");
-
-                    cell.rowSpan = 4;
-                    cell.textContent = "Нет занятий";
-                    cell.classList.add("no-classes");
-
-                    row.appendChild(cell);
-                }
-
-                return;
-            }
-
-
-            const cell = document.createElement("td");
-
-
-            // Если пары в этот день уже закончились
-
-            if (pair >= day.length) {
-
-                cell.textContent = "—";
-                cell.classList.add("empty-pair");
-
-            } else {
-
-                cell.textContent = day[pair];
-
-            }
-
-
-            row.appendChild(cell);
-
-        });
-
-
-        scheduleBody.appendChild(row);
-
-    }
-
 }
 
-
-// ==============================
-// ПЕРЕКЛЮЧЕНИЕ НЕДЕЛЬ
-// ==============================
-
-weekSelect.addEventListener("change", () => {
-
-    renderSchedule(
-        Number(weekSelect.value)
-    );
-
-});
-
-
-// ==============================
-// АВТОВЫБОР ТЕКУЩЕЙ НЕДЕЛИ
-// ==============================
-
-const today = new Date();
-
-let currentWeek = weeks.findIndex(week => {
-
-    const start = new Date(
-        week.start + "T00:00:00"
-    );
-
-    const end = new Date(
-        week.end + "T23:59:59"
-    );
-
-    return today >= start && today <= end;
-
-});
-
-
-if (currentWeek === -1) {
-    currentWeek = 0;
-}
-
-
-weekSelect.value = currentWeek;
-
-renderSchedule(currentWeek); // ==============================
-// БЛОК "СЕГОДНЯ"
-// ==============================
-
-const todayStatus = document.getElementById("todayStatus");
 
 function timeToMinutes(time) {
-    const [hours, minutes] = time.split(":").map(Number);
+
+    const [hours, minutes] =
+        time.split(":").map(Number);
 
     return hours * 60 + minutes;
 }
+
+
+// ==========================================
+// ОСНОВНАЯ ТАБЛИЦА
+// ==========================================
+
+const weekSelect =
+    document.getElementById("weekSelect");
+
+const scheduleHead =
+    document.getElementById("scheduleHead");
+
+const scheduleBody =
+    document.getElementById("scheduleBody");
+
+
+if (weekSelect && scheduleHead && scheduleBody) {
+
+    // Добавляем недели в выпадающий список
+
+    weeks.forEach((week, index) => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = index;
+        option.textContent = week.label;
+
+        weekSelect.appendChild(option);
+    });
+
+
+    function renderSchedule(index) {
+
+        const week = weeks[index];
+
+
+        // Шапка таблицы
+
+        scheduleHead.innerHTML = `
+            <tr>
+
+                <th>
+                    Пара / время
+                </th>
+
+                ${dayNames.map((day, i) => `
+                    <th>
+                        ${day}
+
+                        <small>
+                            ${week.dates[i]}
+                        </small>
+                    </th>
+                `).join("")}
+
+            </tr>
+        `;
+
+
+        scheduleBody.innerHTML = "";
+
+
+        // Максимум 4 пары
+
+        for (let pair = 0; pair < 4; pair++) {
+
+            const row =
+                document.createElement("tr");
+
+
+            // Номер пары + время
+
+            const pairCell =
+                document.createElement("td");
+
+            pairCell.innerHTML = `
+                <strong>
+                    ${pair + 1} пара
+                </strong>
+
+                <span class="pair-time">
+                    ${pairTimes[pair]}
+                </span>
+            `;
+
+            row.appendChild(pairCell);
+
+
+            // Предметы
+
+            week.days.forEach(day => {
+
+
+                // Весь день нет занятий
+
+                if (day.length === 0) {
+
+                    if (pair === 0) {
+
+                        const cell =
+                            document.createElement("td");
+
+                        cell.rowSpan = 4;
+
+                        cell.textContent =
+                            "Нет занятий";
+
+                        cell.classList.add(
+                            "no-classes"
+                        );
+
+                        row.appendChild(cell);
+                    }
+
+                    return;
+                }
+
+
+                const cell =
+                    document.createElement("td");
+
+
+                // Если в этот день пар меньше
+
+                if (pair >= day.length) {
+
+                    cell.textContent = "—";
+
+                    cell.classList.add(
+                        "empty-pair"
+                    );
+
+                } else {
+
+                    cell.innerHTML =
+                        getLessonHTML(
+                            day[pair]
+                        );
+                }
+
+
+                row.appendChild(cell);
+            });
+
+
+            scheduleBody.appendChild(row);
+        }
+    }
+
+
+    // Переключение недели
+
+    weekSelect.addEventListener(
+        "change",
+        () => {
+
+            renderSchedule(
+                Number(
+                    weekSelect.value
+                )
+            );
+        }
+    );
+
+
+    // Текущая неделя
+
+    const now = new Date();
+
+    let currentWeek =
+        weeks.findIndex(week => {
+
+            const start =
+                new Date(
+                    week.start +
+                    "T00:00:00"
+                );
+
+            const end =
+                new Date(
+                    week.end +
+                    "T23:59:59"
+                );
+
+            return (
+                now >= start &&
+                now <= end
+            );
+        });
+
+
+    if (currentWeek === -1) {
+        currentWeek = 0;
+    }
+
+
+    weekSelect.value =
+        currentWeek;
+
+    renderSchedule(
+        currentWeek
+    );
+}
+
+
+// ==========================================
+// БЛОК "СЕГОДНЯ"
+// ==========================================
+
+const todayStatus =
+    document.getElementById(
+        "todayStatus"
+    );
+
 
 function renderToday() {
 
@@ -513,31 +606,37 @@ function renderToday() {
         return;
     }
 
-    const now = new Date();
+
+    const now =
+        new Date();
+
 
     const todayMinutes =
         now.getHours() * 60 +
         now.getMinutes();
 
-    // JS:
-    // воскресенье = 0
-    // понедельник = 1
-    // ...
-    // пятница = 5
-    // суббота = 6
 
-    const jsDay = now.getDay();
+    const jsDay =
+        now.getDay();
 
-    const dateText = now.toLocaleDateString("ru-RU", {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
-    });
+
+    const dateText =
+        now.toLocaleDateString(
+            "ru-RU",
+            {
+                weekday: "long",
+                day: "numeric",
+                month: "long"
+            }
+        );
 
 
     // Выходные
 
-    if (jsDay === 0 || jsDay === 6) {
+    if (
+        jsDay === 0 ||
+        jsDay === 6
+    ) {
 
         todayStatus.innerHTML = `
             <div class="today-date">
@@ -553,19 +652,28 @@ function renderToday() {
     }
 
 
-    // Ищем текущую учебную неделю
+    // Ищем текущую неделю
 
-    const weekIndex = weeks.findIndex(week => {
+    const weekIndex =
+        weeks.findIndex(week => {
 
-        const start =
-            new Date(week.start + "T00:00:00");
+            const start =
+                new Date(
+                    week.start +
+                    "T00:00:00"
+                );
 
-        const end =
-            new Date(week.end + "T23:59:59");
+            const end =
+                new Date(
+                    week.end +
+                    "T23:59:59"
+                );
 
-        return now >= start && now <= end;
-
-    });
+            return (
+                now >= start &&
+                now <= end
+            );
+        });
 
 
     if (weekIndex === -1) {
@@ -576,7 +684,8 @@ function renderToday() {
             </div>
 
             <div class="today-message">
-                На эту дату расписание пока не добавлено.
+                Расписание на эту дату
+                пока не добавлено.
             </div>
         `;
 
@@ -584,16 +693,15 @@ function renderToday() {
     }
 
 
-    const week = weeks[weekIndex];
-
-    const dayIndex = jsDay - 1;
-
-    const lessons = week.days[dayIndex];
+    const lessons =
+        weeks[weekIndex]
+        .days[jsDay - 1];
 
 
-    // Если в этот день вообще нет занятий
-
-    if (!lessons || lessons.length === 0) {
+    if (
+        !lessons ||
+        lessons.length === 0
+    ) {
 
         todayStatus.innerHTML = `
             <div class="today-date">
@@ -609,8 +717,6 @@ function renderToday() {
     }
 
 
-    let lessonsHTML = "";
-
     let currentLesson = -1;
     let nextLesson = -1;
 
@@ -618,14 +724,22 @@ function renderToday() {
     lessons.forEach((lesson, index) => {
 
         const [startTime, endTime] =
-            pairTimes[index].split("–");
+            pairTimes[index]
+            .split("–");
+
 
         const start =
-            timeToMinutes(startTime);
+            timeToMinutes(
+                startTime
+            );
 
         const end =
-            timeToMinutes(endTime);
+            timeToMinutes(
+                endTime
+            );
 
+
+        // Сейчас идёт эта пара
 
         if (
             todayMinutes >= start &&
@@ -634,56 +748,78 @@ function renderToday() {
             currentLesson = index;
         }
 
+
+        // Следующая пара
+
         if (
             nextLesson === -1 &&
             todayMinutes < start
         ) {
             nextLesson = index;
         }
-
     });
 
 
-    lessons.forEach((lesson, index) => {
-
-        let lessonClass = "today-lesson";
-
-        if (index === currentLesson) {
-            lessonClass += " current";
-        }
-
-        else if (
-            currentLesson === -1 &&
-            index === nextLesson
-        ) {
-            lessonClass += " next";
-        }
+    let lessonsHTML = "";
 
 
-        lessonsHTML += `
-            <div class="${lessonClass}">
+    lessons.forEach(
+        (lesson, index) => {
 
-                <div>
-                    <strong>${index + 1} пара</strong>
-                    <div class="today-lesson-name">
-                        ${lesson}
+            let lessonClass =
+                "today-lesson";
+
+
+            if (
+                index === currentLesson
+            ) {
+
+                lessonClass +=
+                    " current";
+
+            } else if (
+                currentLesson === -1 &&
+                index === nextLesson
+            ) {
+
+                lessonClass +=
+                    " next";
+            }
+
+
+            lessonsHTML += `
+                <div class="${lessonClass}">
+
+                    <div>
+
+                        <strong>
+                            ${index + 1} пара
+                        </strong>
+
+                        <div class="today-lesson-name">
+                            ${lesson}
+                        </div>
+
+                        <div class="teacher-name">
+                            ${getTeacher(lesson)}
+                        </div>
+
                     </div>
+
+                    <div class="today-lesson-time">
+                        ${pairTimes[index]}
+                    </div>
+
                 </div>
-
-                <div class="today-lesson-time">
-                    ${pairTimes[index]}
-                </div>
-
-            </div>
-        `;
-
-    });
+            `;
+        }
+    );
 
 
     let message = "";
 
 
-    // Сейчас идёт пара
+    // Пара сейчас идёт
 
     if (currentLesson !== -1) {
 
@@ -691,55 +827,55 @@ function renderToday() {
             pairTimes[currentLesson]
             .split("–")[1];
 
+
         message = `
             Сейчас идёт:
             <strong>
                 ${lessons[currentLesson]}
             </strong>
-            · закончится в ${endTime}
+
+            · закончится в
+            ${endTime}
         `;
 
     }
 
-
-    // Сейчас перемена / ещё не начались пары
-
+    // Следующая пара
     else if (nextLesson !== -1) {
 
         const startTime =
             pairTimes[nextLesson]
             .split("–")[0];
 
+
         const startMinutes =
-            timeToMinutes(startTime);
+            timeToMinutes(
+                startTime
+            );
+
 
         const minutesLeft =
-            startMinutes - todayMinutes;
+            startMinutes -
+            todayMinutes;
 
 
-        if (minutesLeft > 0) {
+        message = `
+            Следующая:
+            <strong>
+                ${lessons[nextLesson]}
+            </strong>
 
-            message = `
-                Следующая:
-                <strong>
-                    ${lessons[nextLesson]}
-                </strong>
-                в ${startTime}
-                · через ${minutesLeft} мин.
-            `;
-
-        }
+            в ${startTime}
+            · через ${minutesLeft} мин.
+        `;
 
     }
 
-
-    // Все пары закончились
-
+    // Всё закончилось
     else {
 
         message =
             "Все пары на сегодня закончились.";
-
     }
 
 
@@ -755,23 +891,30 @@ function renderToday() {
             ${message}
         </div>
     `;
-
 }
 
 
-// Запускаем сразу
+// Запускаем
 
 renderToday();
 
 
-// Обновляем информацию каждую минуту
+// Обновляем каждую минуту
 
-setInterval(renderToday, 60000);// ==============================
+setInterval(
+    renderToday,
+    60000
+);
+
+
+// ==========================================
 // БЛОК "ЗАВТРА"
-// ==============================
+// ==========================================
 
 const tomorrowStatus =
-    document.getElementById("tomorrowStatus");
+    document.getElementById(
+        "tomorrowStatus"
+    );
 
 
 function renderTomorrow() {
@@ -781,16 +924,17 @@ function renderTomorrow() {
     }
 
 
-    // Берём завтрашнюю дату
+    const tomorrow =
+        new Date();
 
-    const tomorrow = new Date();
 
     tomorrow.setDate(
         tomorrow.getDate() + 1
     );
 
 
-    const jsDay = tomorrow.getDay();
+    const jsDay =
+        tomorrow.getDay();
 
 
     const dateText =
@@ -804,9 +948,12 @@ function renderTomorrow() {
         );
 
 
-    // Суббота или воскресенье
+    // Выходной
 
-    if (jsDay === 0 || jsDay === 6) {
+    if (
+        jsDay === 0 ||
+        jsDay === 6
+    ) {
 
         tomorrowStatus.innerHTML = `
             <div class="today-date">
@@ -822,7 +969,7 @@ function renderTomorrow() {
     }
 
 
-    // Ищем неделю, в которую попадает завтра
+    // Ищем неделю
 
     const weekIndex =
         weeks.findIndex(week => {
@@ -843,11 +990,8 @@ function renderTomorrow() {
                 tomorrow >= start &&
                 tomorrow <= end
             );
-
         });
 
-
-    // Если расписание на эту дату ещё не добавлено
 
     if (weekIndex === -1) {
 
@@ -866,16 +1010,10 @@ function renderTomorrow() {
     }
 
 
-    const week = weeks[weekIndex];
-
-    const dayIndex =
-        jsDay - 1;
-
     const lessons =
-        week.days[dayIndex];
+        weeks[weekIndex]
+        .days[jsDay - 1];
 
-
-    // Если весь день свободный
 
     if (
         !lessons ||
@@ -915,6 +1053,10 @@ function renderTomorrow() {
                             ${lesson}
                         </div>
 
+                        <div class="teacher-name">
+                            ${getTeacher(lesson)}
+                        </div>
+
                     </div>
 
                     <div class="tomorrow-lesson-time">
@@ -923,7 +1065,6 @@ function renderTomorrow() {
 
                 </div>
             `;
-
         }
     );
 
@@ -937,16 +1078,23 @@ function renderTomorrow() {
         ${lessonsHTML}
 
         <div class="today-message">
+
             Всего пар:
-            <strong>${lessons.length}</strong>
+            <strong>
+                ${lessons.length}
+            </strong>
+
         </div>
-
     `;
-
 }
 
 
+// Запускаем
+
 renderTomorrow();
+
+
+// Обновляем каждую минуту
 
 setInterval(
     renderTomorrow,
