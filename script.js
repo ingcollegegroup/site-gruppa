@@ -495,4 +495,275 @@ if (currentWeek === -1) {
 
 weekSelect.value = currentWeek;
 
-renderSchedule(currentWeek);
+renderSchedule(currentWeek); // ==============================
+// БЛОК "СЕГОДНЯ"
+// ==============================
+
+const todayStatus = document.getElementById("todayStatus");
+
+function timeToMinutes(time) {
+    const [hours, minutes] = time.split(":").map(Number);
+
+    return hours * 60 + minutes;
+}
+
+function renderToday() {
+
+    if (!todayStatus) {
+        return;
+    }
+
+    const now = new Date();
+
+    const todayMinutes =
+        now.getHours() * 60 +
+        now.getMinutes();
+
+    // JS:
+    // воскресенье = 0
+    // понедельник = 1
+    // ...
+    // пятница = 5
+    // суббота = 6
+
+    const jsDay = now.getDay();
+
+    const dateText = now.toLocaleDateString("ru-RU", {
+        weekday: "long",
+        day: "numeric",
+        month: "long"
+    });
+
+
+    // Выходные
+
+    if (jsDay === 0 || jsDay === 6) {
+
+        todayStatus.innerHTML = `
+            <div class="today-date">
+                ${dateText}
+            </div>
+
+            <div class="today-message">
+                Сегодня занятий нет 😎
+            </div>
+        `;
+
+        return;
+    }
+
+
+    // Ищем текущую учебную неделю
+
+    const weekIndex = weeks.findIndex(week => {
+
+        const start =
+            new Date(week.start + "T00:00:00");
+
+        const end =
+            new Date(week.end + "T23:59:59");
+
+        return now >= start && now <= end;
+
+    });
+
+
+    if (weekIndex === -1) {
+
+        todayStatus.innerHTML = `
+            <div class="today-date">
+                ${dateText}
+            </div>
+
+            <div class="today-message">
+                На эту дату расписание пока не добавлено.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const week = weeks[weekIndex];
+
+    const dayIndex = jsDay - 1;
+
+    const lessons = week.days[dayIndex];
+
+
+    // Если в этот день вообще нет занятий
+
+    if (!lessons || lessons.length === 0) {
+
+        todayStatus.innerHTML = `
+            <div class="today-date">
+                ${dateText}
+            </div>
+
+            <div class="today-message">
+                Сегодня занятий нет.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    let lessonsHTML = "";
+
+    let currentLesson = -1;
+    let nextLesson = -1;
+
+
+    lessons.forEach((lesson, index) => {
+
+        const [startTime, endTime] =
+            pairTimes[index].split("–");
+
+        const start =
+            timeToMinutes(startTime);
+
+        const end =
+            timeToMinutes(endTime);
+
+
+        if (
+            todayMinutes >= start &&
+            todayMinutes <= end
+        ) {
+            currentLesson = index;
+        }
+
+        if (
+            nextLesson === -1 &&
+            todayMinutes < start
+        ) {
+            nextLesson = index;
+        }
+
+    });
+
+
+    lessons.forEach((lesson, index) => {
+
+        let lessonClass = "today-lesson";
+
+        if (index === currentLesson) {
+            lessonClass += " current";
+        }
+
+        else if (
+            currentLesson === -1 &&
+            index === nextLesson
+        ) {
+            lessonClass += " next";
+        }
+
+
+        lessonsHTML += `
+            <div class="${lessonClass}">
+
+                <div>
+                    <strong>${index + 1} пара</strong>
+                    <div class="today-lesson-name">
+                        ${lesson}
+                    </div>
+                </div>
+
+                <div class="today-lesson-time">
+                    ${pairTimes[index]}
+                </div>
+
+            </div>
+        `;
+
+    });
+
+
+    let message = "";
+
+
+    // Сейчас идёт пара
+
+    if (currentLesson !== -1) {
+
+        const endTime =
+            pairTimes[currentLesson]
+            .split("–")[1];
+
+        message = `
+            Сейчас идёт:
+            <strong>
+                ${lessons[currentLesson]}
+            </strong>
+            · закончится в ${endTime}
+        `;
+
+    }
+
+
+    // Сейчас перемена / ещё не начались пары
+
+    else if (nextLesson !== -1) {
+
+        const startTime =
+            pairTimes[nextLesson]
+            .split("–")[0];
+
+        const startMinutes =
+            timeToMinutes(startTime);
+
+        const minutesLeft =
+            startMinutes - todayMinutes;
+
+
+        if (minutesLeft > 0) {
+
+            message = `
+                Следующая:
+                <strong>
+                    ${lessons[nextLesson]}
+                </strong>
+                в ${startTime}
+                · через ${minutesLeft} мин.
+            `;
+
+        }
+
+    }
+
+
+    // Все пары закончились
+
+    else {
+
+        message =
+            "Все пары на сегодня закончились.";
+
+    }
+
+
+    todayStatus.innerHTML = `
+
+        <div class="today-date">
+            ${dateText}
+        </div>
+
+        ${lessonsHTML}
+
+        <div class="today-message">
+            ${message}
+        </div>
+    `;
+
+}
+
+
+// Запускаем сразу
+
+renderToday();
+
+
+// Обновляем информацию каждую минуту
+
+setInterval(renderToday, 60000);
