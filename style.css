@@ -52,6 +52,26 @@ p {
     color: #cfe7db;
 }
 
+.week-picker {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.week-picker label {
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+#weekSelect {
+    background: #163126;
+    color: white;
+    border: 1px solid #2f7d57;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
 .schedule-table {
     width: 90%;
     max-width: 1200px;
@@ -80,6 +100,14 @@ p {
     font-size: 18px;
 }
 
+.schedule-table th small {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: normal;
+    opacity: 0.8;
+}
+
 .schedule-table td {
     color: #e4f3eb;
     font-size: 17px;
@@ -87,4 +115,27 @@ p {
 
 .schedule-table tr:hover td {
     background: #214234;
+}
+
+.no-classes {
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.schedule-button {
+    display: block;
+    width: fit-content;
+    margin: 30px auto;
+    padding: 14px 24px;
+    background: #2f7d57;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 18px;
+    transition: 0.2s;
+}
+
+.schedule-button:hover {
+    background: #3f9b6e;
+    transform: translateY(-2px);
 }
