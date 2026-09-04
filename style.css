@@ -505,4 +505,20 @@ p {
     }
 
 }
+}/* ПРЕПОДАВАТЕЛЬ */
+
+.subject-name {
+    font-weight: 600;
+}
+
+.teacher-name {
+    margin-top: 5px;
+    font-size: 13px;
+    font-style: italic;
+    font-weight: normal;
+    color: #9fd0b5;
+}
+
+.schedule-table .teacher-name {
+    font-size: 12px;
 }
