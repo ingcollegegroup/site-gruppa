@@ -766,4 +766,189 @@ renderToday();
 
 // Обновляем информацию каждую минуту
 
-setInterval(renderToday, 60000);
+setInterval(renderToday, 60000);// ==============================
+// БЛОК "ЗАВТРА"
+// ==============================
+
+const tomorrowStatus =
+    document.getElementById("tomorrowStatus");
+
+
+function renderTomorrow() {
+
+    if (!tomorrowStatus) {
+        return;
+    }
+
+
+    // Берём завтрашнюю дату
+
+    const tomorrow = new Date();
+
+    tomorrow.setDate(
+        tomorrow.getDate() + 1
+    );
+
+
+    const jsDay = tomorrow.getDay();
+
+
+    const dateText =
+        tomorrow.toLocaleDateString(
+            "ru-RU",
+            {
+                weekday: "long",
+                day: "numeric",
+                month: "long"
+            }
+        );
+
+
+    // Суббота или воскресенье
+
+    if (jsDay === 0 || jsDay === 6) {
+
+        tomorrowStatus.innerHTML = `
+            <div class="today-date">
+                ${dateText}
+            </div>
+
+            <div class="today-message">
+                Занятий нет 😎
+            </div>
+        `;
+
+        return;
+    }
+
+
+    // Ищем неделю, в которую попадает завтра
+
+    const weekIndex =
+        weeks.findIndex(week => {
+
+            const start =
+                new Date(
+                    week.start +
+                    "T00:00:00"
+                );
+
+            const end =
+                new Date(
+                    week.end +
+                    "T23:59:59"
+                );
+
+            return (
+                tomorrow >= start &&
+                tomorrow <= end
+            );
+
+        });
+
+
+    // Если расписание на эту дату ещё не добавлено
+
+    if (weekIndex === -1) {
+
+        tomorrowStatus.innerHTML = `
+            <div class="today-date">
+                ${dateText}
+            </div>
+
+            <div class="today-message">
+                Расписание на этот день
+                пока не добавлено.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const week = weeks[weekIndex];
+
+    const dayIndex =
+        jsDay - 1;
+
+    const lessons =
+        week.days[dayIndex];
+
+
+    // Если весь день свободный
+
+    if (
+        !lessons ||
+        lessons.length === 0
+    ) {
+
+        tomorrowStatus.innerHTML = `
+            <div class="today-date">
+                ${dateText}
+            </div>
+
+            <div class="today-message">
+                Занятий нет.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    let lessonsHTML = "";
+
+
+    lessons.forEach(
+        (lesson, index) => {
+
+            lessonsHTML += `
+                <div class="tomorrow-lesson">
+
+                    <div>
+
+                        <strong>
+                            ${index + 1} пара
+                        </strong>
+
+                        <div class="tomorrow-lesson-name">
+                            ${lesson}
+                        </div>
+
+                    </div>
+
+                    <div class="tomorrow-lesson-time">
+                        ${pairTimes[index]}
+                    </div>
+
+                </div>
+            `;
+
+        }
+    );
+
+
+    tomorrowStatus.innerHTML = `
+
+        <div class="today-date">
+            ${dateText}
+        </div>
+
+        ${lessonsHTML}
+
+        <div class="today-message">
+            Всего пар:
+            <strong>${lessons.length}</strong>
+        </div>
+
+    `;
+
+}
+
+
+renderTomorrow();
+
+setInterval(
+    renderTomorrow,
+    60000
+);
